@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, make_response
+from flask import Flask, render_template, request, redirect, url_for, make_response, g
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BOARD)
 import motors
@@ -13,22 +13,29 @@ s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(("8.8.8.8", 80))
 server_ip = s.getsockname()[0]
 s.close()
-
 app = Flask(__name__) 
 
 @app.route('/')
-def index():
 
+def index():
+	global redir
+	redir = 'index'
+	print('gggg : ', redir)
 	return render_template('index.html', server_ip=server_ip)
 
 @app.route('/mobile')
-def getTicket():
-   return render_template('mobile_index.html')
+
+def cat():
+	global redir
+	redir = 'cat'
+	print('gggg : ',redir)
+	return render_template('mobile_index.html', server_ip = server_ip)
 
 @app.route('/<changepin>', methods=['POST'])
-def reroute(changepin):
 
-	changePin = int(changepin) 
+def reroute(changepin):
+	print('ggggfffffffffffffffffff : ', redir)
+	changePin = int(changepin)
 
 	if changePin == 1:
 		motors.turnLeft()
@@ -45,7 +52,7 @@ def reroute(changepin):
 	else:
 		print("Wrong command")
 
-	response = make_response(redirect(url_for('index')))
+	response = make_response(redirect(url_for(redir)))
 	return(response)
 
 app.run(debug=True, host='0.0.0.0', port=8000) 
